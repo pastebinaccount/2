@@ -1,0 +1,76 @@
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local userInputService = game:GetService("UserInputService")
+
+local parryButtonPress = replicatedStorage.Remotes.ParryButtonPress
+
+-- Check if parryButtonPress is not nil
+if not parryButtonPress then
+    warn("ParryButtonPress not found in replicatedStorage.Remotes")
+    return
+end
+
+-- Set the cooldown time in seconds
+local cooldown = 0  -- You can adjust this value
+
+-- Variable to track whether the event should be fired
+local shouldFire = false
+
+-- Function to handle the key press for parryButtonPress
+local function onKeyPress(input)
+    if input.KeyCode == Enum.KeyCode.Z then
+        shouldFire = not shouldFire  -- Toggle the state
+
+        if shouldFire then
+            -- Fire the event when 'Z' is pressed
+            parryButtonPress:Fire()
+        end
+    end
+end
+
+-- Connect the function to the key press event
+userInputService.InputBegan:Connect(onKeyPress)
+
+-- Function to execute the script
+local function executeScript()
+    local args = {
+        [1] = 0.5,
+        [2] = CFrame.new(-273.6231384277344, 121.02775573730469, -183.07217407226562, 0.9999610185623169, -0.0018232688307762146, 0.008637691847980022, -8.098854920035592e-12, 0.9784398078918457, 0.20653189718723297, -0.008828025311231613, -0.2065238505601883, 0.9784017205238342),
+        [3] = {
+            ["2978433560"] = Vector3.new(489.9994201660156, 284.5790710449219, 12.809814453125),
+            ["5081188709"] = Vector3.new(488.1590881347656, 146.71490478515625, -168.92156982421875)
+        },
+        [4] = {
+            [1] = 617,
+            [2] = 89
+        }
+    }
+
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ParryAttempt"):FireServer(unpack(args))
+end
+
+-- Function to execute the script multiple times
+local function executeMultipleTimes(iterations)
+    for _ = 1, iterations do
+        executeScript()
+        wait() -- Set wait time to 0 for faster execution
+    end
+end
+
+-- Function to handle keypress for script execution
+local function onKeyPressForScript(input, gameProcessedEvent)
+    if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.Z then
+        if isRunning then
+            isRunning = false
+            print("Script stopped.")
+        else
+            isRunning = true
+            print("Script started.")
+            while isRunning do
+                executeMultipleTimes(2)  -- Adjust the number of iterations as needed
+            end
+        end
+    end
+end
+
+-- Connect the function to the key press event for script execution
+userInputService.InputBegan:Connect(onKeyPressForScript)
